@@ -1,0 +1,92 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fern-api/fern/main/fern.schema.json
+
+imports:
+  commons: commons.yml
+  policy: policy.yml
+
+services:
+  http:
+    ApplicationService:
+      auth: true
+      base-path: /applications/{application_id}
+      path-parameters:
+        application_id:
+          docs: Unique identifier of the application.
+          type: string
+      endpoints:
+        getApplicationLinks:
+          path: /links
+          method: GET
+          docs: Lists an application's links.
+          display-name: List Application Links
+          request:
+            name: GetApplicationLinksRequest
+            query-parameters:
+              limit:
+                docs: Number of results to return.
+                type: optional<integer>
+              offset:
+                docs: Specifies the offset of the first result to return.
+                type: optional<integer>
+              provider:
+                docs: Partial name of a provider to search against
+                type: optional<string>
+              created_since:
+                docs: Limit results to links created on or after this date.
+                type: optional<string>
+              created_until:
+                docs: Limit results to links created on or before this date.
+                type: optional<string>
+              updated_since:
+                docs: Limit results to links last updated on or since this date.
+                type: optional<string>
+              updated_until:
+                docs: Limit results to links last updated on or before this date.
+                type: optional<string>
+              synced_since:
+                docs: Limit results to links last synced on or after this date.
+                type: optional<string>
+              synced_until:
+                docs: Limit results to links last synced on or before this date.
+                type: optional<string>
+              q:
+                docs: Search for link via ID
+                type: optional<string>
+              status:
+                docs: >-
+                  Filter link status; separate multiple statuses (OR'd) with
+                  commas
+                type: optional<string>
+              has_metadata:
+                docs: Filter whether a link has metadata attached
+                type: optional<boolean>
+              policy_type:
+                docs: The type of policy linked.
+                type: optional<string>
+              integration_ids:
+                docs: >-
+                  If provided, only show items with any of the specified
+                  integration IDs, comma-separated.
+                type: optional<string>
+          response: commons.Links
+
+        getApplicationPolicies:
+          path: /policies
+          method: GET
+          docs: Lists an application's policies.
+          display-name: List Application Policies
+          request:
+            name: GetApplicationPoliciesRequest
+            query-parameters:
+              integration_ids:
+                docs: >-
+                  If provided, only show items with any of the specified
+                  integration IDs, comma-separated.
+                type: optional<string>
+              limit:
+                docs: Number of results to return.
+                type: optional<integer>
+              offset:
+                docs: Specifies the offset of the first result to return.
+                type: optional<integer>
+          response: policy.Policies

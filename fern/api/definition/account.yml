@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fern-api/fern/main/fern.schema.json
+
+services:
+  http:
+    AccountService:
+      auth: true
+      base-path: /accounts/{account_id}/mfa_requirements
+      path-parameters:
+        account_id:
+          docs: Unique identifier of the account.
+          type: string
+      endpoints:
+        enableAccountMfaRequired:
+          path: ""
+          method: POST
+          docs: Require all account users to have an MFA application configured
+          display-name: Enable Account MFA Requirement
+          response: AccountWithConfig
+
+        disableAccountMfaRequired:
+          path: ""
+          method: DELETE
+          docs: >-
+            Remove requirement for all account users to have an MFA application
+            configured
+          display-name: Disable Account MFA Requirement
+
+types:
+  AccountWithConfig:
+    properties: {}

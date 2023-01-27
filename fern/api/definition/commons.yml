@@ -1,4 +1,768 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fern-api/fern/main/fern.schema.json
 
 types:
-  id: string
+  Carrier:
+    docs: >-
+      A basic object describing the individual insurance company which has
+      issued a policy.
+    properties:
+      name:
+        docs: The name of the issuing company.
+        type: optional<string>
+
+  Policyholder:
+    docs: >-
+      Describes the company or person which is legally listed on, and entitled
+      to benefits from the policy for which they are attached.
+    properties:
+      type:
+        docs: An indication if the insured is a business or individual.
+        type: optional<InsuredType>
+      name: optional<Name>
+      email_addresses:
+        docs: The contact e-mail addresses of the insured, if known.
+        type: optional<list<EMail>>
+      phone_numbers:
+        docs: The contact phone numbers of the insured, if known.
+        type: optional<list<Phone>>
+      is_primary:
+        docs: >-
+          A flag indicating if the insured is explicitly referenced as primary,
+          or assumed primary as being the first insured listed on the policy.
+        type: optional<boolean>
+
+  InsuredType:
+    docs: An indication if the insured is a business or individual.
+    enum:
+      - person
+      - business
+
+  Name:
+    docs: Contains a name for a person or business
+    properties:
+      full: optional<string>
+
+  Address:
+    docs: >-
+      A universal base object encapsulating the physical address related to
+      another object.
+    properties:
+      line1:
+        docs: The first line of the address being provided.
+        type: optional<string>
+      line2:
+        docs: The second line of the address, when provided.
+        type: optional<string>
+      city:
+        docs: The city in which the address provided is located.
+        type: optional<string>
+      state:
+        docs: >-
+          The state or provide in which the address is located, represented in
+          abbreviated form.
+        type: optional<string>
+      postal_code:
+        docs: The 5 digit postal code in which the address is located.
+        type: optional<string>
+
+  EMail:
+    docs: >-
+      A universal base object encapsulating the e-mail address related to
+      another object.
+    properties:
+      address: optional<string>
+      is_primary: optional<boolean>
+
+  Phone:
+    docs: >-
+      A universal base object encapsulating the phone number related to another
+      object.
+    properties:
+      type: optional<PhoneType>
+      number: optional<string>
+      is_primary: optional<boolean>
+
+  PhoneType:
+    enum:
+      - mobile
+      - home
+      - office
+      - fax
+
+  Vehicle:
+    docs: >-
+      Describes the motor vehicle which is covered under the terms of a policy.
+      This object contains details of the specific coverages provided for this
+      vehicle and information about the drivers who are covered.
+    properties:
+      vin:
+        docs: >-
+          The unique Vehicle Identification Number (VIN) that pertains to this
+          vehicle.
+        type: optional<string>
+      make:
+        docs: The manufacturer of the vehicle covered by this policy.
+        type: optional<string>
+      model:
+        docs: The model of the vehicle covered by this policy.
+        type: optional<string>
+      year:
+        docs: The 4-digit model year of the vehicle covered by this policy.
+        type: optional<string>
+      trim:
+        docs: The trim of the vehicle covered by this policy.
+        type: optional<string>
+      series:
+        docs: The series of the vehicle covered by this policy.
+        type: optional<string>
+      annual_mileage:
+        docs: >-
+          When provided, the estimated number of miles this vehicle is expected
+          to be driven, per year. When a range is specified by the carrier, the
+          highest value in the range is provided.
+        type: optional<integer>
+      usage:
+        docs: The intended usage of the vehicle by the insured.
+        type: optional<VehicalUsage>
+      ownership:
+        docs: >-
+          Whether or not the vehicle specified is owned, leased, or financed by
+          the insured.
+        type: optional<VehicleOwnership>
+      drivers:
+        docs: A list of drivers assigned to this vehicle.
+        type: optional<list<Driver>>
+      interests:
+        docs: >-
+          The financial institution which presently holds a lien against the
+          vehicle.
+        type: optional<list<Interest>>
+      coverages:
+        docs: >-
+          A list of all coverages that apply to this vehicle. The omission of
+          any coverage indicates that coverage was either declined or does not
+          apply to this vehicle.
+        type: optional<VehicleCoverage>
+      discounts:
+        docs: A list of discounts being applied to the premium of this vehicle.
+        type: optional<list<Discount>>
+
+  VehicalUsage:
+    docs: The intended usage of the vehicle by the insured.
+    enum:
+      - commute
+      - pleasure
+      - business
+
+  VehicleOwnership:
+    docs: >-
+      Whether or not the vehicle specified is owned, leased, or financed by the
+      insured.
+    enum:
+      - own
+      - lease
+      - finance
+
+  VehicleCoverage:
+    docs: >-
+      A list of all coverages that apply to this vehicle. The omission of any
+      coverage indicates that coverage was either declined or does not apply to
+      this vehicle.
+    properties:
+      bodily_injury: optional<Coverage>
+      property_damage: optional<Coverage>
+      medical_payments: optional<Coverage>
+      personal_injury_protection: optional<Coverage>
+      comprehensive: optional<Coverage>
+      collision: optional<Coverage>
+      uninsured_bodily_injury: optional<Coverage>
+      uninsured_property_damage: optional<Coverage>
+      underinsured_bodily_injury: optional<Coverage>
+      underinsured_property_damage: optional<Coverage>
+      roadside: optional<Coverage>
+      rental_car: optional<Coverage>
+      full_glass: optional<Coverage>
+      nonowned_bodily_injury: optional<Coverage>
+      nonowned_property_damage: optional<Coverage>
+      nonowned_medical_payments: optional<Coverage>
+      nonowned_physical_damage: optional<Coverage>
+      oem_parts: optional<Coverage>
+      ride_share: optional<Coverage>
+      all_risk: optional<Coverage>
+      new_vehicle_replacement: optional<Coverage>
+      collision_deductible_waiver: optional<Coverage>
+      loan_lease_payoff: optional<Coverage>
+      custom_parts: optional<Coverage>
+      automobile_death_benefit: optional<Coverage>
+      trip_interruption: optional<Coverage>
+      personal_property: optional<Coverage>
+      limited_property_damage: optional<Coverage>
+      property_protection: optional<Coverage>
+      personal_injury_attendant_rider: optional<Coverage>
+      rented_vehicle_liability: optional<Coverage>
+      motorcycle_enhanced_injury: optional<Coverage>
+      limited_personal_injury_protection: optional<Coverage>
+      carried_contents: optional<Coverage>
+
+  Driver:
+    docs: >-
+      Describes the individual driver who is considered the routine operator of
+      the vehicle it is attached to and who is explicitly included under the
+      coverage terms selected for the vehicle.
+    properties:
+      name: optional<Name>
+      date_of_birth:
+        docs: >-
+          The date of birth of the driver, when provided by the insurer.
+          Represented as an ISO-8601 date.
+        type: optional<string>
+      marital_status:
+        docs: >-
+          The current marital status of the driver, if provided. The `separated`
+          value includes divorced status.
+        type: optional<MaritalStatus>
+      gender:
+        docs: The reported gender of the driver, when provided by the insurer.
+        type: optional<Gender>
+      age_licensed:
+        docs: >-
+          The age in which the driver was first licensed, when provided by the
+          insurer.
+        type: optional<integer>
+      license_number:
+        docs: >-
+          The drivers license number of the driver when provided by the insurer.
+          This value may be masked.
+        type: optional<string>
+      license_state:
+        docs: >-
+          The state in which the driver is licensed. Represented in abbreviated
+          form.
+        type: optional<string>
+      is_primary:
+        docs: >-
+          A flag indicating if the driver is described as the primary driver of
+          the vehicle. When no clear indication is made by an insurer, the first
+          listed driver is assumed to be the primary.
+        type: optional<boolean>
+
+  MaritalStatus:
+    docs: >-
+      The current marital status of the driver, if provided. The `separated`
+      value includes divorced status.
+    enum:
+      - married
+      - single
+      - separated
+      - widowed
+
+  Gender:
+    docs: The reported gender of the driver, when provided by the insurer.
+    enum:
+      - male
+      - female
+      - value: non-binary
+        name: nonBinary
+
+  Interest:
+    docs: >-
+      Describes an entity, person or company, that has a legal interest in a
+      piece of covered property. This could represent a bank or other financial
+      institution who owns a loan/mortgage/lien over a covered property, a
+      landlord who owns the property a tenant is leasing, or some other
+      recognized stakeholder who is entitled to certain information rights from
+      the insurance company regarding the covered property.
+    properties:
+      type:
+        docs: >-
+          The type of interest being described. Such as: lender, landlord,
+          guarantor, or other.
+        type: optional<InterestType>
+      name: optional<Name>
+      email_addresses:
+        docs: E-Mail addresses used to contact the interested party.
+        type: optional<list<EMail>>
+      phone_numbers:
+        docs: >-
+          Phone Numbers used to call the interested party. Provided in E164
+          format.
+        type: optional<list<Phone>>
+
+  InterestType:
+    docs: >-
+      The type of interest being described. Such as: lender, landlord,
+      guarantor, or other.
+    enum:
+      - landlord
+      - lender
+      - guarantor
+      - other
+
+  Coverage:
+    docs: >-
+      Describes the features of a specific coverage element for a person or
+      property, encapsulating the limits, deductibles, and premium information
+      therein.
+    properties:
+      name:
+        docs: >-
+          The name of the coverage element being described. This is a coded
+          value offered as a convenience method to avoid the need to introspect
+          code to understand which branch of logic is being evaluated.
+        type: optional<string>
+      limits:
+        docs: >-
+          A breakout of different limits and sublimits that apply to this
+          coverage item. When the limits property is null, then the coverage
+          described is selected but limits are not applicable for the coverage
+          feature. The ommission of any limit scope indicates that it does not
+          apply to the coverage.
+        type: optional<CoverageLimits>
+
+  CoverageLimits:
+    docs: >-
+      A breakout of different limits and sublimits that apply to this coverage
+      item. When the limits property is null, then the coverage described is
+      selected but limits are not applicable for the coverage feature. The
+      ommission of any limit scope indicates that it does not apply to the
+      coverage.
+    properties:
+      duration: optional<PeriodValue>
+      term: optional<CurrencyValue>
+
+  CurrencyValue:
+    docs: >-
+      Describes a value that is tied to a monetary amount. Most frequently used
+      to describe limits, premiums, and deductibles.
+    properties:
+      unit:
+        docs: The ISO-compatible currency code of the value being represented.
+        type: optional<CurrencyCode>
+      value:
+        docs: The amount of currency
+        type: optional<double>
+
+  CurrencyCode:
+    docs: The ISO-compatible currency code of the value being represented.
+    enum:
+      - USD
+      - USD_cents
+
+  RelativeValue:
+    docs: >-
+      Describes a value that is relative to another, such as the fair market
+      value or replacement value. It is inherently variable and subject to the
+      context in which it is invoked.
+    properties:
+      unit:
+        docs: Always "other".
+        type: optional<Other>
+      value:
+        docs: >-
+          The form of measure used to calculate the relative value, such as
+          "actual cash value" or "ACV" which looks at the original price or
+          investment and factors in depreciation (effectively "Fair Market
+          Value"), or "replacement cost" (sometimes "Actual Loss Sustained" or
+          "ALS") which sets a value against real cost to replace something
+          today.
+          Occasionally, a response of "unknown" may be returned. This value
+          indicates that no specific value was provided in high level policy
+          documents. The value may be subjective and specific to the individual
+          policyholder as specified in their policy contract and should be
+          manually reviewed.
+        type: optional<ActualCashValue>
+
+  Other:
+    docs: Always "other".
+    enum:
+      - other
+
+  ActualCashValue:
+    docs: >-
+      The form of measure used to calculate the relative value, such as "actual
+      cash value" or "ACV" which looks at the original price or investment and
+      factors in depreciation (effectively "Fair Market Value"), or "replacement
+      cost" (sometimes "Actual Loss Sustained" or "ALS") which sets a value
+      against real cost to replace something today.
+      Occasionally, a response of "unknown" may be returned. This value
+      indicates that no specific value was provided in high level policy
+      documents. The value may be subjective and specific to the individual
+      policyholder as specified in their policy contract and should be manually
+      reviewed.
+    enum:
+      - actual_cash_value
+      - replacement_value
+      - unknown
+
+  PercentageValue:
+    docs: >-
+      Describes a value that is represented as a percentage, fraction, or ratio
+      of another value. Most frequently depicted for deductibles which may be a
+      percentage of a limit.
+    properties:
+      unit:
+        docs: Always "percentage"
+        type: optional<Percentage>
+      value:
+        docs: The percentage amount determined by this value.
+        type: optional<double>
+
+  Percentage:
+    docs: Always "percentage"
+    enum:
+      - percentage
+
+  DistanceValue:
+    docs: >-
+      Describes a value that is tied to a physical length or distance. Most
+      frequently used to describe limits on coverages.
+    properties:
+      unit:
+        docs: The distance unit of the value being represented.
+        type: optional<DistanceUnit>
+      value:
+        docs: The amount of the distance in the units specified
+        type: optional<double>
+
+  DistanceUnit:
+    docs: The distance unit of the value being represented.
+    enum:
+      - mile
+      - kilometer
+
+  PeriodValue:
+    docs: >-
+      Describes a value that represents a period of time, such as days, weeks,
+      or months.
+    properties:
+      unit:
+        docs: The scale of time period being represented.
+        type: optional<TimeScale>
+      value:
+        docs: The amount of time being represented.
+        type: optional<integer>
+
+  TimeScale:
+    docs: The scale of time period being represented.
+    enum:
+      - day
+      - week
+      - month
+
+  Discount:
+    docs: >-
+      Describes a discount which a policyholder is receiving for a particular
+      covered property under a policy. When available, this object also
+      describes the amount of savings.
+    properties:
+      code:
+        docs: >-
+          The programming-friendly value to indicate the discount being applied.
+          NOTE: We regularly add values to this enumeration, so your code should
+          be able to gracefully handle unexpected enum values (though new values
+          are documented here as they go live).
+        type: optional<DiscountType>
+      friendly_name:
+        docs: A human-readable, friendly name for the discount.
+        type: optional<string>
+
+  DiscountType:
+    docs: >-
+      The programming-friendly value to indicate the discount being applied.
+      NOTE: We regularly add values to this enumeration, so your code should be
+      able to gracefully handle unexpected enum values (though new values are
+      documented here as they go live).
+    enum:
+      - safe_driver
+      - telematics
+      - online
+      - bundle
+      - teen_driver
+      - claim_free
+      - homeowner
+      - new_car
+      - multi_car
+      - pay_in_full
+      - paperless_billing
+      - loyalty
+      - good_student
+      - distant_student
+      - accident_free
+      - continuous_insurance
+      - eft
+      - early_quote
+      - alarm_system
+      - new_home
+      - new_roof
+      - safe_vehicle
+      - smart_vehicle
+      - membership
+      - payment_plan
+      - military
+      - garage_parking
+      - senior
+      - autopay
+      - insurance_to_value
+      - verified_mileage
+      - payment_history
+      - motorcycle_endorsement
+
+  Location:
+    docs: >-
+      Describes a physical location and/or structure which is covered under the
+      terms of an insurance policy.
+    properties:
+      address: optional<Address>
+      coverages:
+        docs: A list of coverages that apply to the location being insured.
+        type: optional<CoverageInfo>
+      other_deductibles:
+        docs: >-
+          A list of deductibles that apply in addition to the coverage-specific
+          deductibles.
+        type: optional<unknown>
+      discounts:
+        docs: A list of discounts being applied to the location.
+        type: optional<list<Discount>>
+      interests:
+        docs: >-
+          A list of interested parties, such as mortgagers, lienholders,
+          guarantors, landlords, or others.
+        type: optional<list<Interest>>
+
+  CoverageInfo:
+    docs: A list of coverages that apply to the location being insured.
+    properties:
+      dwelling: optional<Coverage>
+      dwelling_extension: optional<Coverage>
+      personal_property: optional<Coverage>
+      personal_property_off_premises: optional<Coverage>
+      loss_of_use: optional<Coverage>
+      service_line: optional<Coverage>
+      personal_liability: optional<Coverage>
+      medical_payments: optional<Coverage>
+      property_damage_others: optional<Coverage>
+      fire_service: optional<Coverage>
+      loss_assessment: optional<Coverage>
+      sewer_backup: optional<Coverage>
+      arson_reward: optional<Coverage>
+      credit_card_fraud: optional<Coverage>
+      debris_removal: optional<Coverage>
+      oil_release: optional<Coverage>
+      locks: optional<Coverage>
+      landscaping: optional<Coverage>
+      additional_structures: optional<Coverage>
+
+  DocumentRef:
+    docs: >-
+      Describes the individual insurance document available for download from a
+      given insurance policy, including the content-type (or mimetype) of the
+      document.
+    properties:
+      type:
+        docs: The type of document provided at the corresponding URL.
+        type: optional<DocumentType>
+      content_type:
+        docs: >-
+          The content-type, or mimetype, of the document being conveyed at this
+          location.
+        type: optional<string>
+      href:
+        docs: The path to retrieve the document described in this object.
+        type: optional<string>
+
+  DocumentType:
+    docs: The type of document provided at the corresponding URL.
+    enum:
+      - declaration
+      - id_card
+      - renewal
+      - evidence_of_insurance
+      - cancellation
+
+  Events:
+    properties:
+      count:
+        docs: The total, unfiltered number of events without pagination
+        type: optional<integer>
+      filtered_count:
+        docs: The unpaginated number of events matching the filter
+        type: optional<integer>
+      _embedded: optional<EmbeddedEvents>
+
+  EmbeddedEvents:
+    properties:
+      events: optional<list<Event>>
+
+  Event:
+    docs: >-
+      Represents an event delivered via webhook on the occurrence of certain
+      policy changes.
+    properties:
+      id:
+        docs: The unique identifier of the received event.
+        type: optional<string>
+      event_type:
+        docs: An enumerated string representing the type of event that occurred.
+        type: optional<EventType>
+      occurred_at:
+        docs: >-
+          The date and time in which the event occurred, represented as an
+          ISO-8601 string.
+        type: optional<string>
+      _links: optional<EventPayloadLinkContainer>
+
+  EventType:
+    docs: An enumerated string representing the type of event that occurred.
+    enum:
+      - value: link.created
+        name: linkCreated
+      - value: link.successful
+        name: linkSuccessful
+      - value: link.documents.available
+        name: linkDocumentsAvailable
+      - value: link.broken
+        name: linkBroken
+      - value: link.stale
+        name: linkStale
+      - value: link.changed
+        name: linkChanged
+      - value: policies.unlinked
+        name: policiesUnlinked
+      - value: policy.activated
+        name: policyActivated
+      - value: policy.cancelling
+        name: policyCancelling
+      - value: policy.expired
+        name: policyExpired
+      - value: policy.reinstated
+        name: policyReinstated
+      - value: policy.renewed
+        name: policyRenewed
+      - value: policy.changed
+        name: policyChanged
+      - value: policy.changed.coverage
+        name: policyChangedCoverage
+      - value: policy.changed.insureds
+        name: policyChangedInsureds
+      - value: policy.changed.status
+        name: policyChangedStatus
+      - value: policy.changed.premium
+        name: policyChangedPremium
+
+  EventPayloadLink:
+    docs: Link to view the full event payload.
+    properties:
+      href: optional<string>
+
+  EventPayloadLinkContainer:
+    properties:
+      payload:
+        docs: Link to view the full event payload.
+        type: optional<EventPayloadLink>
+
+  Link:
+    docs: >-
+      Represents the individual connections between Covie and a Policyholder's
+      account with a carrier and wraps the policies retrieved from it that have
+      been made available to the consumer.
+    properties:
+      id:
+        docs: The unique identifier of the link object.
+        type: optional<string>
+      object:
+        docs: >-
+          String representing the object’s type. Objects of the same type share
+          the same value.
+        type: optional<string>
+      integration_id:
+        docs: The identifier of the integration that was used to establish the link.
+        type: optional<string>
+      policy_count:
+        docs: The number of policies provided by this link.
+        type: optional<integer>
+      status:
+        docs: >-
+          A string representation of the link's current status. This is distinct
+          from a policy's status which is an indicator to whether a policy is in
+          force. A link's status is an indicator of how new and complete the
+          data is and whether or not it is possible to retrieve refreshed
+          information.
+        type: optional<LinkStatus>
+      is_tracked:
+        docs: >-
+          A flag indicating if the policies provided by this link should be
+          tracked by Covie's monitoring service.
+        type: optional<boolean>
+      tracking_frequency:
+        docs: >-
+          The frequency of which tracking should be performed. This value is
+          `never` when tracking is disabled.
+        type: optional<TrackingFrequency>
+      updated_at:
+        docs: The date and time, in ISO-8601 format, when the link was last updated.
+        type: optional<string>
+      created_at:
+        docs: >-
+          The date and time, in ISO-8601 format, when the link was first
+          created.
+        type: optional<string>
+      _links: optional<LinkInfo>
+
+  LinkStatus:
+    docs: >-
+      A string representation of the link's current status. This is distinct
+      from a policy's status which is an indicator to whether a policy is in
+      force. A link's status is an indicator of how new and complete the data is
+      and whether or not it is possible to retrieve refreshed information.
+    enum:
+      - new
+      - active
+      - document_uploaded
+      - broken
+      - revoked
+      - stale
+
+  TrackingFrequency:
+    docs: >-
+      The frequency of which tracking should be performed. This value is `never`
+      when tracking is disabled.
+    enum:
+      - daily
+      - weekly
+      - monthly
+      - never
+      - on_demand
+
+  Links:
+    properties:
+      count:
+        docs: Total number of results that can be returned.
+        type: optional<integer>
+      filtered_count:
+        docs: >-
+          If a search filter is applied, this will return the total number of
+          results that match the filter.
+        type: optional<integer>
+      _embedded: optional<EmbeddedLinks>
+
+  EmbeddedLinks:
+    properties:
+      links: optional<list<Link>>
+
+  LinkDetails:
+    properties:
+      href: optional<string>
+      content_type: optional<string>
+
+  LinkInfo:
+    properties:
+      self:
+        docs: Link to retrieve the link's details.
+        type: optional<LinkDetails>
+      carrier_logo:
+        docs: Link to the carrier's logo.
+        type: optional<LinkDetails>
+      uploaded_documents:
+        docs: List of documents uploaded for the link.
+        type: optional<list<LinkDetails>>

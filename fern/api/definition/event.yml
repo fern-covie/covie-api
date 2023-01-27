@@ -1,0 +1,52 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fern-api/fern/main/fern.schema.json
+
+services:
+  http:
+    EventService:
+      auth: true
+      base-path: /events/{event_id}/broadcasts
+      path-parameters:
+        event_id: string
+      endpoints:
+        rebroadcast:
+          path: ""
+          method: POST
+          docs: Rebroadcast an event.
+          display-name: Rebroadcast Event
+          response: RebroadcastEventResponse
+
+types:
+  EventBroadcast:
+    docs: Record of a broadcast to a webhook endpoint when an event is triggered.
+    properties:
+      id:
+        docs: Unique identifier for the broadcast.
+        type: optional<string>
+      queued_at:
+        docs: Date/Time the broadcast was prepared for delivery.
+        type: optional<string>
+      broadcast_at:
+        docs: Date/Time the broadcast was sent.
+        type: optional<string>
+      request_uri:
+        docs: URI the broadcast was sent to.
+        type: optional<string>
+      response_code:
+        docs: Response code from the URI.
+        type: optional<integer>
+      response_body:
+        docs: Contents of the response.
+        type: optional<string>
+
+  EmbeddedRebroadcastEvents:
+    properties:
+      broadcasts:
+        docs: List of broadcasts, one per endpoint called
+        type: optional<list<EventBroadcast>>
+
+  RebroadcastEventResponse:
+    properties:
+      count:
+        docs: Number of endpoints called by this re-broadcast
+        type: optional<integer>
+      _embedded: optional<EmbeddedRebroadcastEvents>

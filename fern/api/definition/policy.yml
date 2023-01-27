@@ -1,0 +1,198 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fern-api/fern/main/fern.schema.json
+
+imports:
+  commons: commons.yml
+
+services:
+  http:
+    PolicyService:
+      auth: true
+      base-path: /policies/{policy_id}
+      path-parameters:
+        policy_id:
+          docs: The unique identifier of the policy object being sought.
+          type: string
+      endpoints:
+        getPoliciesPolicyId:
+          path: ""
+          method: GET
+          docs: Retrieve a Policy object that was previously connected via a Link
+          display-name: Retrieve Policy
+          response: Policy
+
+        listPolicyEvents:
+          path: /events
+          method: GET
+          docs: List all events that have been triggered for the selected policy
+          display-name: List Policy Events
+          request:
+            name: ListPolicyEventsRequest
+            query-parameters:
+              limit:
+                docs: Number of results to return.
+                type: optional<integer>
+              offset:
+                docs: Specifies the offset of the first result to return.
+                type: optional<integer>
+              event_type:
+                docs: Filter events by type.
+                type: optional<string>
+          response: commons.Events
+
+types:
+  Policies:
+    properties:
+      count:
+        docs: Total number of results that can be returned.
+        type: optional<integer>
+      filtered_count:
+        docs: The total number of policies that match the filter.
+        type: optional<integer>
+      _embedded: optional<EmbeddedPolicies>
+
+  EmbeddedPolicies:
+    properties:
+      policies: optional<list<Policy>>
+
+  Policy:
+    docs: >-
+      This describes, in high level, the insurance policy record that is
+      provided by a link. This object encapsulates all the necessary details to
+      understand the policy's status, policyholders, and covered persons or
+      properties.
+    properties:
+      id:
+        docs: >-
+          Unique identifier of a policy record within the application that
+          obtained it.
+        type: optional<string>
+      object:
+        docs: >-
+          String representing the object’s type. Objects of the same type share
+          the same value.
+        type: optional<string>
+      fingerprint:
+        docs: A universally-unique identifier of a policy.
+        type: optional<string>
+      carrier: optional<commons.Carrier>
+      number:
+        docs: >-
+          The full policy number as provided by the issuing company. This is not
+          available to all users and may be null when not active on the account.
+        type: optional<string>
+      masked_number:
+        docs: >-
+          This is a masked version of the policy number provided by the issuing
+          company. This is always provided and available to all customers.
+        type: optional<string>
+      line:
+        docs: A string indicating the line of business this policy encompasses.
+        type: optional<LineOfBusiness>
+      policyholders:
+        docs: A list of insureds, or policyholders assigned to this policy.
+        type: optional<list<commons.Policyholder>>
+      vehicles: optional<list<commons.Vehicle>>
+      locations: optional<list<commons.Location>>
+      status:
+        docs: A string representation of the policy's current status.
+        type: optional<PolicyStatus>
+      term_length: optional<commons.PeriodValue>
+      inception_date:
+        docs: >-
+          The date when the policy becomes in force. This date is provided in
+          ISO-8601 format excluding time.
+        type: optional<string>
+      expiration_date:
+        docs: >-
+          The date when the described policy period ends. This date is provided
+          in ISO-8601 format excluding time.
+        type: optional<string>
+      cancellation_date:
+        docs: >-
+          The date when the policy is set to be cancelled. This date is provided
+          in ISO-8601 format excluding time.
+        type: optional<string>
+      cancellation_reason:
+        docs: >-
+          The determined reason for the cancellation, such as
+          insured_non_payment or carrier_non_renew or insured_action. This value
+          is null when cancellation is not active or not explicitly indicated by
+          the carrier systems and is not guaranteed to be provided in any
+          circumstance.
+        type: optional<CancellationReason>
+      linked_at:
+        docs: >-
+          The date and time which the policy was initially retrieved. This date
+          and time is provided in ISO-8601 format.
+        type: optional<string>
+      last_synced_at:
+        docs: >-
+          The date and time when the policy record was last updated. This date
+          and time is provided in ISO-8601 format.
+        type: optional<string>
+      _links:
+        docs: >-
+          A polymorphic list of externally linked resources related to this
+          policy such as documents or logos for carriers.
+        type: optional<LinkedResources>
+      _embedded:
+        docs: A container for objects wrapped by the current object.
+        type: optional<EmbeddedObjects>
+      link_id:
+        docs: Unique identifier of the link associated to the policy.
+        type: optional<string>
+
+  LineOfBusiness:
+    docs: A string indicating the line of business this policy encompasses.
+    enum:
+      - personal_auto
+      - homeowner
+      - renter
+      - motorcycle
+
+  PolicyStatus:
+    docs: A string representation of the policy's current status.
+    enum:
+      - active
+      - expired
+      - pending
+      - cancelled
+
+  CancellationReason:
+    docs: >-
+      The determined reason for the cancellation, such as insured_non_payment or
+      carrier_non_renew or insured_action. This value is null when cancellation
+      is not active or not explicitly indicated by the carrier systems and is
+      not guaranteed to be provided in any circumstance.
+    enum:
+      - carrier_non_renew
+      - insured_non_payment
+      - insured_requested
+      - other
+
+  Logo:
+    docs: A link to the logo for the carrier on the policy.
+    properties:
+      href: optional<string>
+
+  LinkedResources:
+    docs: >-
+      A polymorphic list of externally linked resources related to this policy
+      such as documents or logos for carriers.
+    properties:
+      documents:
+        docs: >-
+          A list of documents obtained and available for this policy. This list
+          may be empty if no documents are available or if document access is
+          not enabled for your account.
+        type: optional<list<commons.DocumentRef>>
+      carrier_logo:
+        docs: A link to the logo for the carrier on the policy.
+        type: optional<Logo>
+
+  EmbeddedObjects:
+    docs: A container for objects wrapped by the current object.
+    properties:
+      missing_fields:
+        docs: A list of policy fields that were unable to be processed.
+        type: optional<list<string>>

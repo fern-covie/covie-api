@@ -1,6 +1,7 @@
 name: api
-auth: bearer
-environments:
-  Production: https://api.example.com
-  Sandbox: https://sandbox.example.com
+display-name: Covie Policy API
+auth: basic
 default-environment: Production
+environments:
+  Production: https://api.covie.io/v1
+  Mock: https://stoplight.io/mocks/covie/link-access/37161102
