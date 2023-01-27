@@ -1,0 +1,1227 @@
+openapi: 3.1.0
+info:
+  title: Policy API
+  version: '1.0'
+  contact:
+    name: Covie Developer Support
+    email: developer-help@covie.io
+  termsOfService: 'https://www.covie.com/legal'
+  description: 'The Policy API is intended to be used to retrieve policies and links that are created when an end-user completes the Access Workflow found within our Link Embed. This API is largely read-only, retrieving authoritative data that originates with and is controlled by an insurance company.  There are several fields which can be modified via this API in order to mange how Covie is handling and refreshing the underlying data.'
+  summary: Server-to-Server API for retrieving and managing policy objects.
+servers:
+  - url: 'https://api.covie.io/v1'
+paths:
+  '/policies/{policy_id}':
+    parameters:
+      - $ref: ./parameters/policy_id.yaml
+    get:
+      summary: Retrieve Policy
+      tags:
+        - policy
+      responses:
+        '200':
+          $ref: ./responses/Policy.yaml
+        '404':
+          description: Not Found
+      operationId: get-policies-policy_id
+      description: Retrieve a Policy object that was previously connected via a Link
+      parameters: []
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+  '/policies/{policy_id}/documents/{document_type}':
+    parameters:
+      - $ref: ./parameters/policy_id.yaml
+      - $ref: ./parameters/document_type.yaml
+    get:
+      summary: Retrieve Policy Document
+      tags:
+        - policy
+      responses:
+        '200':
+          $ref: ./responses/FileContents.yaml
+        '404':
+          description: Not Found
+      operationId: get-policy-document
+      description: Retrieve the contents of a Policy document
+      parameters: []
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+  '/policies/{policy_id}/events':
+    parameters:
+      - $ref: ./parameters/policy_id.yaml
+    get:
+      summary: List Policy Events
+      tags:
+        - policy
+      responses:
+        '200':
+          $ref: ./responses/Events.yaml
+        '404':
+          description: Not Found
+      operationId: list-policy-events
+      description: List all events that have been triggered for the selected policy
+      parameters:
+        - $ref: ./parameters/limit.yaml
+        - $ref: ./parameters/offset.yaml
+        - $ref: ./parameters/event_type.yaml
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+  /integrations:
+    get:
+      summary: List Integrations
+      tags:
+        - integration
+      responses:
+        '200':
+          $ref: ./responses/Integrations.yaml
+      operationId: list-integrations
+      description: List integrations associated to an application
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+      parameters:
+        - $ref: ./parameters/integration_search.yaml
+        - $ref: ./parameters/integration_status.yaml
+    post:
+      summary: Create Integration
+      operationId: create-integration
+      responses:
+        '201':
+          $ref: ./responses/Integration.yaml
+      description: Creates a new integration.
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Demo Integration
+                  description: Descriptive name of the integration
+                policyRequirements:
+                  type: object
+                  properties:
+                    effective_date:
+                      type: string
+                      example: +90 days
+                      description: Allow selection of policies that are not effective until a future date
+                      default: +0 days
+                    allow_inactive:
+                      type: boolean
+                      description: Allow selection of inactive policies
+                      default: false
+                configuration:
+                  type: object
+                  properties:
+                    brand:
+                      type: object
+                      description: Branding configuration for the embed.
+                      properties:
+                        logo:
+                          type: string
+                          format: url
+                          description: Brand logo to be used in the embed.
+                        hide_logo:
+                          type: boolean
+                          description: Hides the logo.
+                        colors:
+                          type: object
+                          properties:
+                            primary:
+                              type: string
+                              example: '#F0F0F0'
+                              description: 'Sets the primary color, the primary text style color, and the primary background color to the configured color.'
+                    display_name:
+                      type: string
+                      description: 'Name to display as application name in the embed, on policy selection and data disclosure screens.'
+                      example: Demo Application
+                    use_name_as_display_name:
+                      type: boolean
+                      description: Display the integration's name as the application name in the embed. Cannot be set at the same time as display_name.
+              required:
+                - name
+            examples:
+              Example:
+                value:
+                  name: Demo Integration
+                  policyRequirements:
+                    effective_date: +0 days
+                    allow_inactive: false
+      tags:
+        - integration
+  '/integrations/{integration_id}':
+    parameters:
+      - $ref: ./parameters/integration_id.yaml
+    get:
+      summary: Get Integration
+      tags:
+        - integration
+      responses:
+        '200':
+          $ref: ./responses/Integration.yaml
+        '404':
+          description: Not Found
+      operationId: get-integration
+      description: Retrieve the details of an integration.
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+    patch:
+      summary: Update Integration
+      operationId: update-integration
+      responses:
+        '200':
+          $ref: ./responses/Integration.yaml
+        '404':
+          description: Not Found
+        '422':
+          description: Unprocessable Entity
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+      description: Edit the name and archived status of an integration.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Demo Integration
+                  description: A descriptive name of the integration
+                  minLength: 1
+                status:
+                  type: string
+                  enum:
+                    - active
+                    - archived
+                  example: archived
+                  description: String representation of the current status of the integration.
+                configuration:
+                  type: object
+                  properties:
+                    brand:
+                      type: object
+                      description: Branding configuration for the embed.
+                      properties:
+                        logo:
+                          type: string
+                          format: url
+                          description: Brand logo to be used in the embed.
+                        hide_logo:
+                          type: boolean
+                          description: Hides the logo.
+                        colors:
+                          type: object
+                          properties:
+                            primary:
+                              type: string
+                              example: '#F0F0F0'
+                              description: 'Sets the primary color, the primary text style color, and the primary background color to the configured color.'
+                    display_name:
+                      type: string
+                      description: 'Name to display as application name in the embed, on policy selection and data disclosure screens.'
+                      example: Demo Application
+                    use_name_as_display_name:
+                      type: boolean
+                      description: Display the integration's name as the application name in the embed. Cannot be set at the same time as display_name.
+                policy_requirements:
+                  type: object
+                  properties:
+                    allow_inactive:
+                      type: boolean
+                      description: Allows users to link policies that are currently inactive. Incompatible with effective_date.
+                    effective_date:
+                      type: string
+                      example: +30 days
+                      description: 'Allows users to link a policy if it will be active as of a given date. The date can be absolute (YYYY-MM-DD) or relative, with relative dates evaluated when the policy is being linked. Primarily used to allow pending policies to be linked. Incompatible with allow_inactive.'
+        description: ''
+      tags:
+        - integration
+    delete:
+      summary: Delete Integration
+      operationId: delete-integration
+      responses:
+        '205':
+          description: Reset Content
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: The Integration you are trying to delete has links associated.
+      description: Deletes an integration.
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+      tags:
+        - integration
+  '/links/{id}':
+    parameters:
+      - $ref: ./parameters/link_id.yaml
+    get:
+      summary: Retrieve link
+      tags:
+        - link
+      responses:
+        '200':
+          $ref: ./responses/Link.yaml
+        '404':
+          description: Not Found
+      operationId: get-link
+      description: Retrieves a Link
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+    patch:
+      summary: Update Link Settings
+      operationId: update-link-settings
+      tags:
+        - link
+      responses:
+        '200':
+          $ref: ./responses/Link.yaml
+        '403':
+          description: Forbidden
+        '422':
+          description: Unprocessable Entity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                metadata:
+                  type: object
+                  description: 'Arbitrary key value pairs. The entire object is replaced on-update (missing keys in the request body will be removed). Keys are alphanumeric plus _, -, ., and space, at most 64 characters. Values are at most 256 characters. You can have at most 32 metadata keys on a link.'
+                tracking_frequency:
+                  type: string
+                  description: The frequency of which tracking should be performed. This value is `never` when tracking is disabled.
+                  enum:
+                    - never
+                    - daily
+                    - weekly
+                    - monthly
+                    - on_demand
+      security:
+        - DashboardAuth:
+            - 'application.{application_id}'
+        - BasicAuth: []
+    delete:
+      summary: Delete Link
+      tags:
+        - link
+      responses:
+        '205':
+          description: Reset Content
+      operationId: delete-link
+      description: Deletes a link.
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+  '/links/{id}/policies':
+    parameters:
+      - $ref: ./parameters/link_id.yaml
+    get:
+      summary: List Link Policies
+      tags:
+        - link
+        - policy
+      responses:
+        '200':
+          $ref: ./responses/Policies.yaml
+        '404':
+          description: Not Found
+      operationId: get-link-policies
+      description: Retrieves a list of policies associated with the requested link
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+      parameters:
+        - $ref: ./parameters/limit.yaml
+        - $ref: ./parameters/offset.yaml
+  '/links/{id}/events':
+    parameters:
+      - $ref: ./parameters/link_id.yaml
+    get:
+      summary: List Link Events
+      tags:
+        - link
+      responses:
+        '200':
+          $ref: ./responses/Events.yaml
+        '404':
+          description: Not Found
+      operationId: get-link-events
+      description: Retrieves a list of events triggered for the requested link
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+      parameters:
+        - $ref: ./parameters/limit.yaml
+        - $ref: ./parameters/offset.yaml
+        - $ref: ./parameters/event_type.yaml
+  '/links/{id}/documents':
+    parameters:
+      - $ref: ./parameters/link_id.yaml
+    post:
+      summary: Upload Document To Link
+      description: 'Attach a policy document to a Link. If the document can be parsed, select the parsed policy for sharing.'
+      operationId: attach-link-document
+      tags:
+        - link
+      requestBody:
+        content:
+          application/pdf:
+            schema:
+              type: object
+              properties: {}
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location:
+              schema:
+                type: string
+              description: Link to access the uploaded document
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _links:
+                    type: object
+                    properties:
+                      self:
+                        type: object
+                        description: Link to access the uploaded document
+                        properties:
+                          href:
+                            type: string
+                            format: uri
+        '400':
+          description: Cannot parse document when document parsing is required by application settings
+        '404':
+          description: Not Found
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+  '/links/{id}/syncs':
+    parameters:
+      - $ref: ./parameters/link_id.yaml
+    post:
+      summary: Manually Sync Link
+      tags:
+        - link
+      operationId: sync-link-manually
+      description: Sync a tracked link with the provider using the stored user credentials
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+      responses:
+        '303':
+          description: See Other
+          headers:
+            Location:
+              schema:
+                type: string
+              description: The URL link we just synced
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '503':
+          description: Service Unavailable
+        '511':
+          description: Stored user credentials are no longer valid
+  '/integrations/{integration_id}/links':
+    parameters:
+      - $ref: ./parameters/integration_id.yaml
+    post:
+      summary: Initialize link
+      tags:
+        - link
+        - integration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                metadata:
+                  type: object
+                  description: 'Arbitrary key value pairs. The entire object is replaced on-update (missing keys in the request body will be removed). Keys are alphanumeric plus _, -, ., and space, at most 64 characters. Values are at most 256 characters. You can have at most 32 metadata keys on a link.'
+                provider_id:
+                  type: string
+                  description: 'If supplied, selects the insurance carrier associated with the link. If the link is resumed from the embed, the insured will land on that carrier''s login page. If policy documents are uploaded, parsing will be attempted based on the selected carrier.'
+      responses:
+        '200':
+          $ref: ./responses/Link.yaml
+        '403':
+          description: Selected Integration is not active
+        '404':
+          description: Not Found
+        '422':
+          description: Invalid metadata or provider ID
+      operationId: initialize-link-via-integration
+      description: 'Creates a link and optionally sets metadata and selects a carrier, allowing for seeding initial data before an insured continues the linking process via the embed'
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+    get:
+      summary: List Integration Links
+      tags:
+        - link
+        - integration
+      responses:
+        '200':
+          $ref: ./responses/Links.yaml
+        '404':
+          description: Not Found
+      operationId: get-integration-links
+      description: Retrieves a list of links associated to the requested integration
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+      parameters:
+        - $ref: ./parameters/limit.yaml
+        - $ref: ./parameters/offset.yaml
+        - $ref: ./parameters/provider_name_search.yaml
+        - $ref: ./parameters/link_created_since_date.yaml
+        - $ref: ./parameters/link_created_until_date.yaml
+        - $ref: ./parameters/link_updated_since_date.yaml
+        - $ref: ./parameters/link_updated_until_date.yaml
+        - $ref: ./parameters/link_synced_since_date.yaml
+        - $ref: ./parameters/link_synced_until_date.yaml
+        - $ref: ./parameters/link_smart_search.yaml
+        - $ref: ./parameters/link_status.yaml
+        - $ref: ./parameters/link_has_metadata.yaml
+        - $ref: ./parameters/link_policy_type.yaml
+  '/integrations/{integration_id}/policies':
+    parameters:
+      - $ref: ./parameters/integration_id.yaml
+    get:
+      summary: List Integration Policies
+      tags:
+        - integration
+        - policy
+      responses:
+        '200':
+          $ref: ./responses/Policies.yaml
+        '404':
+          description: Not Found
+      operationId: get-integration-policies
+      description: List all policies that have been linked to an integration.
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+      parameters:
+        - $ref: ./parameters/limit.yaml
+        - $ref: ./parameters/offset.yaml
+  '/integrations/{integration_id}/links_with_policies':
+    parameters:
+      - $ref: ./parameters/integration_id.yaml
+    get:
+      summary: List Integration Links With Policies
+      tags:
+        - link
+        - integration
+        - policy
+      responses:
+        '200':
+          $ref: ./responses/LinksWithPolicies.yaml
+        '404':
+          description: Not Found
+      operationId: get-integration-links-with-policies
+      description: Retrieves a list of links and selected policies associated to the requested integration
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+      parameters:
+        - $ref: ./parameters/limit.yaml
+        - $ref: ./parameters/offset.yaml
+        - $ref: ./parameters/provider_name_search.yaml
+        - $ref: ./parameters/link_created_since_date.yaml
+        - $ref: ./parameters/link_created_until_date.yaml
+        - $ref: ./parameters/link_updated_since_date.yaml
+        - $ref: ./parameters/link_updated_until_date.yaml
+        - $ref: ./parameters/link_synced_since_date.yaml
+        - $ref: ./parameters/link_synced_until_date.yaml
+        - $ref: ./parameters/link_policy_type.yaml
+        - $ref: ./parameters/policy_filter_type.yaml
+  '/integrations/{integration_id}/providers':
+    parameters:
+      - $ref: ./parameters/integration_id.yaml
+    get:
+      summary: Supported Providers List
+      tags:
+        - integration
+      responses:
+        '200':
+          $ref: ./responses/Providers.yaml
+        '404':
+          description: Not Found
+      operationId: get-integration-providers
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+      description: 'Retrieve a list of supported carriers for a given integration, along with their identifiers.'
+      parameters:
+        - $ref: ./parameters/policy_types.yaml
+  '/integrations/{integration_id}/regenerate_key':
+    parameters:
+      - $ref: ./parameters/integration_id.yaml
+    post:
+      summary: Regenerate Integration Key
+      operationId: regenerate-integration-key
+      responses:
+        '200':
+          $ref: ./responses/Integration.yaml
+        '404':
+          description: Not Found
+      description: Replaces the existing integration key with a new randomly generated key.
+      parameters: []
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+      tags:
+        - integration
+  '/accounts/{account_id}/mfa_requirements':
+    post:
+      summary: Enable Account MFA Requirement
+      operationId: enable-account-mfa-required
+      description: Require all account users to have an MFA application configured
+      tags:
+        - account
+      responses:
+        '200':
+          $ref: ./responses/AccountWithConfig.yaml
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - DashboardAuth:
+            - 'account.{account_id}'
+            - 'elevated.{entity_id}'
+    delete:
+      summary: Disable Account MFA Requirement
+      operationId: disable-account-mfa-required
+      description: Remove requirement for all account users to have an MFA application configured
+      tags:
+        - account
+      responses:
+        '205':
+          description: Reset Content
+        '404':
+          description: Not Found
+      security:
+        - DashboardAuth:
+            - 'account.{account_id}'
+            - 'elevated.{entity_id}'
+    parameters:
+      - $ref: ./parameters/account_id.yaml
+  '/applications/{application_id}/links':
+    parameters:
+      - $ref: ./parameters/application_id.yaml
+    get:
+      summary: List Application Links
+      tags:
+        - application
+        - link
+      responses:
+        '200':
+          $ref: ./responses/Links.yaml
+        '404':
+          description: Not Found
+      operationId: get-application-links
+      description: Lists an application's links.
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+      parameters:
+        - $ref: ./parameters/limit.yaml
+        - $ref: ./parameters/offset.yaml
+        - $ref: ./parameters/provider_name_search.yaml
+        - $ref: ./parameters/link_created_since_date.yaml
+        - $ref: ./parameters/link_created_until_date.yaml
+        - $ref: ./parameters/link_updated_since_date.yaml
+        - $ref: ./parameters/link_updated_until_date.yaml
+        - $ref: ./parameters/link_synced_since_date.yaml
+        - $ref: ./parameters/link_synced_until_date.yaml
+        - $ref: ./parameters/link_smart_search.yaml
+        - $ref: ./parameters/link_status.yaml
+        - $ref: ./parameters/link_has_metadata.yaml
+        - $ref: ./parameters/link_policy_type.yaml
+        - $ref: ./parameters/integration_id_list.yaml
+  '/applications/{application_id}/policies':
+    parameters:
+      - $ref: ./parameters/application_id.yaml
+    get:
+      summary: List Application Policies
+      tags:
+        - application
+        - policy
+      responses:
+        '200':
+          $ref: ./responses/Policies.yaml
+        '404':
+          description: Not Found
+      operationId: get-application-policies
+      description: Lists an application's policies.
+      security:
+        - BasicAuth: []
+        - DashboardAuth:
+            - 'application.{application_id}'
+      parameters:
+        - $ref: ./parameters/integration_id_list.yaml
+        - $ref: ./parameters/limit.yaml
+        - $ref: ./parameters/offset.yaml
+  /webhooks:
+    get:
+      summary: List Webhooks
+      description: List an application's configured webhooks.
+      operationId: list-webhooks
+      tags:
+        - webhook
+      parameters:
+        - $ref: ./parameters/limit.yaml
+        - $ref: ./parameters/offset.yaml
+        - $ref: ./parameters/event_type.yaml
+      responses:
+        '200':
+          $ref: ./responses/Webhooks.yaml
+      security:
+        - DashboardAuth:
+            - 'application.{application_id}'
+        - BasicAuth: []
+    post:
+      summary: Create Webhook
+      description: Create a new webhook
+      operationId: create-webhook
+      tags:
+        - webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                uri:
+                  type: string
+                  format: uri
+                  example: 'https://example.com/handle/webhook'
+                  description: URI the webhook should make a request to when the event is triggered.
+                headers:
+                  type: object
+                  description: List of the headers and their values that should be included in the request.
+                event_types:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      - link.created
+                      - link.changed
+                      - link.successful
+                      - link.documents.available
+                      - link.broken
+                      - link.stale
+                      - policies.unlinked
+                      - policy.activated
+                      - policy.cancelling
+                      - policy.expired
+                      - policy.reinstated
+                      - policy.renewed
+                      - policy.changed
+                      - policy.changed.coverage
+                      - policy.changed.insureds
+                      - policy.changed.status
+                      - policy.changed.premium
+      responses:
+        '201':
+          $ref: ./responses/Webhook.yaml
+        '422':
+          description: Unprocessable Entity
+      security:
+        - DashboardAuth:
+            - 'application.{application_id}'
+        - BasicAuth: []
+  '/webhooks/{webhook_id}':
+    parameters:
+      - $ref: ./parameters/webhook_id.yaml
+    get:
+      summary: Get Webhook
+      description: Get the details of a webhook.
+      operationId: get-webhook
+      tags:
+        - webhook
+      responses:
+        '200':
+          $ref: ./responses/Webhook.yaml
+        '404':
+          description: Not Found
+      security:
+        - DashboardAuth:
+            - 'application.{application_id}'
+        - BasicAuth: []
+    patch:
+      summary: Update Webhook
+      description: Update a webhook.
+      operationId: update-webhook
+      tags:
+        - webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                uri:
+                  type: string
+                  format: uri
+                  example: 'https://example.com/handle/webhook'
+                  description: URI the webhook should make a request to when the event is triggered.
+                headers:
+                  type: object
+                  description: List of the headers and their values that should be included in the request.
+                is_enabled:
+                  type: boolean
+                event_types:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      - link.created
+                      - link.changed
+                      - link.successful
+                      - link.documents.available
+                      - link.broken
+                      - link.stale
+                      - policies.unlinked
+                      - policy.activated
+                      - policy.cancelling
+                      - policy.expired
+                      - policy.reinstated
+                      - policy.renewed
+                      - policy.changed
+                      - policy.changed.coverage
+                      - policy.changed.insureds
+                      - policy.changed.status
+                      - policy.changed.premium
+      responses:
+        '200':
+          $ref: ./responses/Webhook.yaml
+        '404':
+          description: Not Found
+        '422':
+          description: Unprocessable Entity
+      security:
+        - DashboardAuth:
+            - 'application.{application_id}'
+        - BasicAuth: []
+  '/webhooks/{webhook_id}/events':
+    parameters:
+      - $ref: ./parameters/webhook_id.yaml
+    get:
+      summary: List Webhook Events
+      description: List the events that have been triggered for a webhook.
+      operationId: list-webhook-events
+      tags:
+        - webhook
+        - event
+      parameters:
+        - $ref: ./parameters/limit.yaml
+        - $ref: ./parameters/offset.yaml
+        - $ref: ./parameters/event_type.yaml
+      responses:
+        '200':
+          $ref: ./responses/Events.yaml
+        '404':
+          description: Not Found
+      security:
+        - DashboardAuth:
+            - 'application.{application_id}'
+        - BasicAuth: []
+  '/events/{event_id}/broadcasts':
+    parameters:
+      - schema:
+          type: string
+        name: event_id
+        in: path
+        required: true
+    post:
+      security:
+        - DashboardAuth:
+            - 'application.{application_id}'
+        - BasicAuth: []
+      summary: Rebroadcast Event
+      tags:
+        - event
+      responses:
+        '200':
+          description: Event Rebroadcast Successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    description: Number of endpoints called by this re-broadcast
+                  _embedded:
+                    type: object
+                    properties:
+                      broadcasts:
+                        type: array
+                        description: 'List of broadcasts, one per endpoint called'
+                        items:
+                          $ref: ./models/EventBroadcast.yaml
+        '404':
+          description: Event Not Found
+      operationId: post-events-event_id-broadcasts
+      description: Rebroadcast an event.
+  '/integrations/{integration_id}/agency_logo':
+    parameters:
+      - $ref: ./parameters/integration_id.yaml
+    get:
+      summary: View Agency Logo
+      tags:
+        - integration
+      responses:
+        '200':
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                pattern: ^image/(png|jpeg)$
+        '302':
+          description: Agency logo found at remote url
+        '404':
+          description: Agency logo not found or not configured
+      operationId: get-integrations-integration_id-agency_logo
+      description: View the agency logo for the hosted integration.
+      security:
+        - DashboardAuth:
+            - 'application.{application_id}'
+        - BasicAuth: []
+    put:
+      summary: Update Agency Logo
+      tags:
+        - integration
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  href:
+                    type: string
+                    format: uri
+                    description: Relative URL to access agency logo
+        '415':
+          description: Unsupported Media Type
+        '422':
+          description: Integration conflict found while updating the image
+      operationId: put-integrations-integration_id-agency_logo
+      description: Upload the agency logo for the hosted integration.
+      security:
+        - DashboardAuth:
+            - 'application.{application_id}'
+        - BasicAuth: []
+    delete:
+      summary: Delete Agency Logo
+      tags:
+        - integration
+      responses:
+        '204':
+          description: No Content
+      operationId: delete-integrations-integration_id-agency_logo
+      description: Delete the agency logo and/or config if present.
+      security:
+        - DashboardAuth:
+            - 'application.{application_id}'
+        - BasicAuth: []
+  '/integrations/{integration_id}/agent_photo':
+    parameters:
+      - $ref: ./parameters/integration_id.yaml
+    get:
+      summary: View Agent Photo
+      tags:
+        - integration
+      responses:
+        '200':
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                pattern: ^image/(png|jpeg)$
+        '302':
+          description: Agent photo found at remote url
+        '404':
+          description: Agent photo not found or not configured
+      operationId: get-integrations-integration_id-agent_photo
+      description: View the agent photo for the hosted integration.
+      security:
+        - DashboardAuth:
+            - 'application.{application_id}'
+        - BasicAuth: []
+    put:
+      summary: Update Agent Photo
+      tags:
+        - integration
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  href:
+                    type: string
+                    format: uri
+                    description: Relative URL to access agent photo
+        '415':
+          description: Unsupported Media Type
+        '422':
+          description: Integration conflict found while updating the image
+      operationId: put-integrations-integration_id-agent_photo
+      description: Upload an agent photo for the hosted integration.
+      security:
+        - DashboardAuth:
+            - 'application.{application_id}'
+        - BasicAuth: []
+    delete:
+      summary: Delete Agent Photo
+      tags:
+        - integration
+      responses:
+        '204':
+          description: No Content
+      operationId: delete-integrations-integration_id-agent_photo
+      description: Delete the agent photo and/or config if present.
+      security:
+        - DashboardAuth:
+            - 'application.{application_id}'
+        - BasicAuth: []
+  '/integrations/{integration_id}/brand_logo':
+    parameters:
+      - $ref: ./parameters/integration_id.yaml
+    get:
+      summary: View Brand Logo
+      tags:
+        - integration
+      responses:
+        '200':
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                pattern: ^image/(png|jpeg)$
+        '302':
+          description: Brand logo found at remote url
+        '404':
+          description: Brand logo not found or not configured
+      operationId: get-integrations-integration_id-brand_logo
+      description: View the brand logo for the integration.
+    put:
+      summary: Update Brand Logo
+      tags:
+        - integration
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  href:
+                    type: string
+                    format: uri
+                    description: Relative URL to access brand logo
+        '415':
+          description: Unsupported Media Type
+        '422':
+          description: Integration conflict found while updating the image
+      operationId: put-integrations-integration_id-brand_logo
+      description: Upload the brand logo for the hosted integration.
+      security:
+        - DashboardAuth:
+            - 'application.{application_id}'
+        - BasicAuth: []
+    delete:
+      summary: Delete Brand Logo
+      tags:
+        - integration
+      responses:
+        '204':
+          description: No Content
+      operationId: delete-integrations-integration_id-brand_logo
+      description: Delete the brand logo and/or config if present.
+      security:
+        - DashboardAuth:
+            - 'application.{application_id}'
+        - BasicAuth: []
+components:
+  schemas: {}
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+      description: An application's Client ID and Client Secret are combined to form the username and password.
+    DashboardAuth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: ''
+          tokenUrl: ''
+          refreshUrl: ''
+          scopes:
+            user: Used to manage user configuration and to request an account scoped token.
+            'account.{account_id}': Used to manage accounts and configure applications. Permission is limited to the account identified.
+            'application.{application_id}': Used to view and manage data within an application. Permission is limited to the application identified.
+            'elevated.{entity_id}': Short lived token used for performing sensitive functionality. Permission is limited to the entity identified.
+      description: Authentication system used by the Client Dashboard.
+tags:
+  - name: account
+    description: <SchemaDefinition schemaRef="./models/AccountWithRole.yaml" />
+    x-displayName: Account
+  - name: address
+    description: <SchemaDefinition schemaRef="./models/Address.yaml" />
+    x-displayName: Address
+  - name: application
+    description: <SchemaDefinition schemaRef="./models/Application.yaml" />
+    x-displayName: Application
+  - name: carrier
+    description: <SchemaDefinition schemaRef="./models/Carrier.yaml" />
+    x-displayName: Carrier
+  - name: coverage
+    description: <SchemaDefinition schemaRef="./models/Coverage.yaml" />
+    x-displayName: Coverage
+  - name: currencyvalue
+    description: <SchemaDefinition schemaRef="./models/CurrencyValue.yaml" />
+    x-displayName: CurrencyValue
+  - name: discount
+    description: <SchemaDefinition schemaRef="./models/Discount.yaml" />
+    x-displayName: Discount
+  - name: documentref
+    description: <SchemaDefinition schemaRef="./models/DocumentRef.yaml" />
+    x-displayName: DocumentRef
+  - name: driver
+    description: <SchemaDefinition schemaRef="./models/Driver.yaml" />
+    x-displayName: Driver
+  - name: email
+    description: <SchemaDefinition schemaRef="./models/EMail.yaml" />
+    x-displayName: E-Mail
+  - name: event
+    description: <SchemaDefinition schemaRef="./models/Event.yaml" />
+    x-displayName: Event
+  - name: integration
+    description: <SchemaDefinition schemaRef="./models/Integration.yaml" />
+    x-displayName: Integration
+  - name: interest
+    description: <SchemaDefinition schemaRef="./models/Interest.yaml" />
+    x-displayName: Interest
+  - name: link
+    description: <SchemaDefinition schemaRef="./models/Link.yaml" />
+    x-displayName: Link
+  - name: location
+    description: <SchemaDefinition schemaRef="./models/Location.yaml" />
+    x-displayName: Location
+  - name: name
+    description: <SchemaDefinition schemaRef="./models/Name.yaml" />
+    x-displayName: Name
+  - name: oauth-client
+    description: <SchemaDefinition schemaRef="./models/OauthClient.yaml" />
+    x-displayName: OAuth Client
+  - name: percentagevalue
+    description: <SchemaDefinition schemaRef="./models/PercentageValue.yaml" />
+    x-displayName: PercentageValue
+  - name: periodvalue
+    description: <SchemaDefinition schemaRef="./models/PeriodValue.yaml" />
+    x-displayName: PeriodValue
+  - name: phone
+    description: <SchemaDefinition schemaRef="./models/Phone.yaml" />
+    x-displayName: Phone
+  - name: policy
+    description: <SchemaDefinition schemaRef="./models/Policy.yaml" />
+    x-displayName: Policy
+  - name: policyholder
+    description: <SchemaDefinition schemaRef="./models/Policyholder.yaml" />
+    x-displayName: Policyholder
+  - name: relativevalue
+    description: <SchemaDefinition schemaRef="./models/RelativeValue.yaml" />
+    x-displayName: RelativeValue
+  - name: user
+    description: <SchemaDefinition schemaRef="./models/User.yaml" />
+    x-displayName: User
+  - name: vehicle
+    description: <SchemaDefinition schemaRef="./models/Vehicle.yaml" />
+    x-displayName: Vehicle
+  - name: webhook
+    description: <SchemaDefinition schemaRef="./models/Webhook.yaml" />
+    x-displayName: Webhook
+x-tagGroups:
+  - name: API Reference
+    tags:
+      - link
+      - policy
+      - application
+      - policyholder
+      - location
+      - vehicle
+      - driver
+      - coverage
+      - discount
+      - carrier
+      - interest
+      - address
+      - phone
+      - email
+      - documentref
+      - currencyvalue
+      - percentagevalue
+      - relativevalue
+      - periodvalue
+      - name
+      - event
+      - billing
